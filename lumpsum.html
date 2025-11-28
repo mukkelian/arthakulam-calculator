@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Lumpsum Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { font-family: Arial; background:#f4f7ff; margin:0; padding:20px; }
+.container {
+    max-width: 500px; margin:auto; background:white;
+    padding:20px; border-radius:8px; border:1px solid #d9e1ff;
+}
+h2 { text-align:center; color:#1d4ed8; }
+label { font-weight:bold; display:block; margin-bottom:5px; }
+.slider-value { background:#eef3ff; padding:4px 8px; border-radius:5px; }
+
+input[type=range] { width:100%; }
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+input[type=number]{
+    -moz-appearance: textfield;
+    width: 60px;
+    padding: 6px;
+    margin-left: 10px;
+    border: 1px solid #c7d3ff;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align:right;
+}
+
+#result{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:bold;
+    color:#1d4ed8;
+    line-height:1.6;
+}
+
+canvas{ margin-top:20px; }
+.row{ margin-bottom:20px; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Lumpsum Calculator</h2>
+
+    <!-- INVESTMENT -->
+    <div class="row">
+        <label>Investment Amount (₹)</label>
+        <span id="inv_val" class="slider-value">200000</span>
+
+        <input type="number" id="inv_input" min="5000" max="5000000" value="200000"
+            oninput="limitDigits(this,7); syncInvInput();">
+
+        <input type="range" id="inv" min="5000" max="5000000" step="10000" value="200000"
+            oninput="syncInvSlider()">
+    </div>
+
+    <!-- RETURN RATE -->
+    <div class="row">
+        <label>Expected Annual Return (%)</label>
+        <span id="ret_val" class="slider-value">12.0%</span>
+
+        <input type="number" id="ret_input" min="1" max="30" step="0.1" value="12.0"
+            oninput="limitDigits(this,4); syncRetInput();">
+
+        <input type="range" id="ret" min="1" max="30" step="0.5" value="12.0"
+            oninput="syncRetSlider()">
+    </div>
+
+    <!-- YEARS -->
+    <div class="row">
+        <label>Duration (Years)</label>
+        <span id="year_val" class="slider-value">10</span>
+
+        <input type="number" id="year_input" min="1" max="50" step="1" value="10"
+            oninput="limitDigits(this,2); syncYearInput();">
+
+        <input type="range" id="year" min="1" max="50" step="1" value="10"
+            oninput="syncYearSlider()">
+    </div>
+
+    <div id="result"></div>
+    <canvas id="ls_chart"></canvas>
+</div>
+
+<script>
+let lsChart;
+
+function limitDigits(input,max){
+    if(input.value.length > max){
+        input.value = input.value.slice(0,max);
+    }
+}
+
+/* Sync */
+function syncInvSlider(){ inv_input.value = inv.value; calcLS(); }
+function syncInvInput(){ inv.value = inv_input.value; calcLS(); }
+
+function syncRetSlider(){
+    ret_input.value = Number(ret.value).toFixed(1);
+    calcLS();
+}
+function syncRetInput(){
+    calcLS();
+}
+
+function syncYearSlider(){ year_input.value = year.value; calcLS(); }
+function syncYearInput(){ year.value = year_input.value; calcLS(); }
+
+/* Calc */
+function calcLS(){
+    let amount = +inv_input.value;
+    let rate = parseFloat(ret_input.value)/100;
+    let years = +year_input.value;
+
+    inv_val.innerText = amount;
+    ret_val.innerText = parseFloat(ret_input.value).toFixed(1)+"%";
+    year_val.innerText = years;
+
+    let fv = amount * Math.pow(1+rate, years);
+    let gain = fv - amount;
+
+    result.innerHTML =
+        `Future Value: ₹${fv.toFixed(0)}<br>
+         Invested: ₹${amount.toFixed(0)}<br>
+         Gain: ₹${gain.toFixed(0)}`;
+
+    if(lsChart) lsChart.destroy();
+    lsChart = new Chart(document.getElementById("ls_chart"),{
+        type:"pie",
+        data:{
+            labels:["Invested","Gain"],
+            datasets:[{
+                data:[amount,gain],
+                backgroundColor:["#1d4ed8","#16a34a"]
+            }]
+        }
+    });
+}
+
+calcLS();
+</script>
+
+</body>
+</html>
+

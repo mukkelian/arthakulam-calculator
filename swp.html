@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>SWP Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { font-family: Arial; background:#f4f7ff; margin:0; padding:20px; }
+.container {
+    max-width: 500px; margin:auto; background:white;
+    padding:20px; border-radius:8px; border:1px solid #d9e1ff;
+}
+h2 { text-align:center; color:#1d4ed8; }
+label { font-weight:bold; display:block; margin-bottom:5px; }
+.slider-value { background:#eef3ff; padding:4px 8px; border-radius:5px; }
+
+input[type=range] { width:100%; }
+
+/* REMOVE ARROWS */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+input[type=number]{
+    -moz-appearance:textfield;
+    width:70px;
+    padding:6px;
+    margin-left:10px;
+    border:1px solid #c7d3ff;
+    border-radius:5px;
+    font-size:14px;
+    text-align:right;
+}
+
+#result{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:bold;
+    color:#1d4ed8;
+    line-height:1.6;
+}
+canvas { margin-top:20px; }
+.row { margin-bottom:20px; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>SWP Calculator</h2>
+
+    <!-- Initial Investment -->
+    <div class="row">
+        <label>Initial Investment (₹)</label>
+        <span id="swp_inv_val" class="slider-value">500000</span>
+
+        <input type="number" id="swp_inv_input" min="50000" max="10000000" value="500000"
+            oninput="limitDigits(this,8); syncSWPInvInput();">
+
+        <input type="range" id="swp_inv" min="50000" max="10000000" step="50000" value="500000"
+            oninput="syncSWPInvSlider()">
+    </div>
+
+    <!-- Monthly Withdrawal -->
+    <div class="row">
+        <label>Monthly Withdrawal (₹)</label>
+        <span id="swp_with_val" class="slider-value">10000</span>
+
+        <input type="number" id="swp_with_input" min="1000" max="200000" value="10000"
+            oninput="limitDigits(this,6); syncSWPWithInput();">
+
+        <input type="range" id="swp_with" min="1000" max="200000" step="1000" value="10000"
+            oninput="syncSWPWithSlider()">
+    </div>
+
+    <!-- Expected Return -->
+    <div class="row">
+        <label>Expected Annual Return (%)</label>
+        <span id="swp_ret_val" class="slider-value">10.0%</span>
+
+        <input type="number" id="swp_ret_input" min="1" max="30" step="0.1" value="10.0"
+            oninput="limitDigits(this,4); syncSWPRetInput();">
+
+        <input type="range" id="swp_ret" min="1" max="30" step="0.5" value="10.0"
+            oninput="syncSWPRetSlider()">
+    </div>
+
+    <div id="result"></div>
+    <canvas id="swp_chart"></canvas>
+</div>
+
+<script>
+let swpChart;
+
+function limitDigits(input,max){
+    if(input.value.length > max){
+        input.value = input.value.slice(0,max);
+    }
+}
+
+/* SYNC FUNCTIONS */
+function syncSWPInvSlider(){ swp_inv_input.value = swp_inv.value; calcSWP(); }
+function syncSWPInvInput(){ swp_inv.value = swp_inv_input.value; calcSWP(); }
+
+function syncSWPWithSlider(){ swp_with_input.value = swp_with.value; calcSWP(); }
+function syncSWPWithInput(){ swp_with.value = swp_with_input.value; calcSWP(); }
+
+function syncSWPRetSlider(){
+    swp_ret_input.value = Number(swp_ret.value).toFixed(1);
+    calcSWP();
+}
+function syncSWPRetInput(){
+    calcSWP();    /* allow free decimal entry */
+}
+
+/* MAIN SWP CALCULATION */
+function calcSWP(){
+
+    let invest = +swp_inv_input.value;
+    let withdraw = +swp_with_input.value;
+    let rate = parseFloat(swp_ret_input.value)/100/12;
+
+    swp_inv_val.innerText = invest;
+    swp_with_val.innerText = withdraw;
+    swp_ret_val.innerText = parseFloat(swp_ret_input.value).toFixed(1) + "%";
+
+    let balance = invest;
+    let months = 0;
+
+    /* SAFETY LIMIT = 200 years = 2400 months */
+    while(balance > 0 && months < 2400){
+        balance = balance * (1 + rate) - withdraw;
+        months++;
+    }
+
+    let years_with_return = (months/12).toFixed(1);
+    let totalWithdrawn = withdraw * months;
+    let finalBalance = Math.max(balance, 0);
+
+    /* WITHOUT SWP RETURN (no interest) */
+    let months_no_return = invest / withdraw;
+    let years_no_return = (months_no_return / 12).toFixed(1);
+
+    /* DISPLAY RESULTS */
+    result.innerHTML =
+        `Corpus Lasts (With SWP): ${years_with_return} years<br>
+         Corpus Lasts (Without SWP): ${years_no_return} years<br>
+         Total Withdrawn: ₹${totalWithdrawn.toFixed(0)}<br>
+         Final Balance: ₹${finalBalance.toFixed(0)}`;
+
+    /* PIE CHART */
+    if(swpChart) swpChart.destroy();
+
+    swpChart = new Chart(document.getElementById("swp_chart"), {
+        type:"pie",
+        data:{
+            labels:["Initial Investment","Total Withdrawn"],
+            datasets:[{
+                data:[invest, totalWithdrawn],
+                backgroundColor:["#1d4ed8","#16a34a"]
+            }]
+        }
+    });
+}
+
+calcSWP();
+</script>
+
+</body>
+</html>
