@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>SIP Calculator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { font-family: Arial; background:#f4f7ff; margin:0; padding:20px; }
+.container {
+    max-width: 500px; margin:auto; background:white;
+    padding:20px; border-radius:8px; border:1px solid #d9e1ff;
+}
+h2 { text-align:center; color:#1d4ed8; }
+label { font-weight:bold; display:block; margin-bottom:5px; }
+.slider-value { background:#eef3ff; padding:4px 8px; border-radius:5px; }
+
+input[type=range] { width:100%; }
+
+/* REMOVE SPINNER ARROWS */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+    width: 50px;         /* YOUR REQUIRED SIZE */
+    padding: 6px;
+    margin-left: 10px;
+    border: 1px solid #c7d3ff;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: right;
+}
+
+#result {
+    margin-top:15px; 
+    font-size:18px;
+    font-weight:bold;
+    color:#1d4ed8;
+    line-height: 1.6;
+}
+
+canvas { margin-top:20px; }
+.row { margin-bottom:20px; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>SIP Calculator</h2>
+
+    <!-- MONTHLY SIP AMOUNT -->
+    <div class="row">
+        <label>Monthly SIP Amount (₹)</label>
+        <span id="sip_amt_val" class="slider-value">10000</span>
+
+        <input type="number"
+               id="sip_amt_input"
+               min="500"
+               max="100000"
+               step="100"
+               value="10000"
+               oninput="limitDigits(this,6); syncSIPAmountFromInput();">
+
+        <input type="range"
+               id="sip_amt"
+               min="500"
+               max="100000"
+               step="500"
+               value="10000"
+               oninput="syncSIPAmountFromSlider()">
+    </div>
+
+    <!-- EXPECTED RETURN -->
+    <div class="row">
+        <label>Expected Annual Return (%)</label>
+        <span id="sip_ret_val" class="slider-value">12.0%</span>
+
+        <input type="number"
+               id="sip_ret_input"
+               min="1"
+               max="30"
+               step="0.1"
+               value="12.0"
+               oninput="limitDigits(this,4); syncReturnFromInput();">
+
+        <input type="range"
+               id="sip_ret"
+               min="1"
+               max="30"
+               step="0.5"
+               value="12.0"
+               oninput="syncReturnFromSlider()">
+    </div>
+
+    <!-- DURATION YEARS -->
+    <div class="row">
+        <label>Duration (Years)</label>
+        <span id="sip_year_val" class="slider-value">10</span>
+
+        <input type="number"
+               id="sip_year_input"
+               min="1"
+               max="50"
+               step="1"
+               value="10"
+               oninput="limitDigits(this,2); syncYearsFromInput();">
+
+        <input type="range"
+               id="sip_year"
+               min="1"
+               max="50"
+               step="1"
+               value="10"
+               oninput="syncYearsFromSlider()">
+    </div>
+
+    <div id="result"></div>
+    <canvas id="sip_chart"></canvas>
+</div>
+
+<script>
+let sipChart;
+
+/* ---------------- DIGIT LIMIT ---------------- */
+function limitDigits(input, maxDigits) {
+    if (input.value.length > maxDigits) {
+        input.value = input.value.slice(0, maxDigits);
+    }
+}
+
+/* ---------------- SYNC FUNCTIONS ---------------- */
+function syncSIPAmountFromSlider() {
+    sip_amt_input.value = sip_amt.value;
+    calcSIP();
+}
+function syncSIPAmountFromInput() {
+    sip_amt.value = sip_amt_input.value;
+    calcSIP();
+}
+
+/* Return slider → input box (rounded), but input box → free entry */
+function syncReturnFromSlider() {
+    sip_ret_input.value = Number(sip_ret.value).toFixed(1);
+    calcSIP();
+}
+function syncReturnFromInput() {
+    // DO NOT update slider → allow ANY decimal input
+    calcSIP();
+}
+
+/* Years sync */
+function syncYearsFromSlider() {
+    sip_year_input.value = sip_year.value;
+    calcSIP();
+}
+function syncYearsFromInput() {
+    sip_year.value = sip_year_input.value;
+    calcSIP();
+}
+
+/* ---------------- SIP CALCULATION ---------------- */
+function calcSIP() {
+    let amount = +sip_amt_input.value;
+    let rate = parseFloat(sip_ret_input.value) / 100 / 12;   // Use EXACT typed value
+    let years = +sip_year_input.value;
+    let months = years * 12;
+
+    sip_amt_val.innerText = amount;
+    sip_ret_val.innerText = parseFloat(sip_ret_input.value).toFixed(1) + "%";
+    sip_year_val.innerText = years;
+
+    let fv = amount * ((Math.pow(1 + rate, months) - 1) / rate) * (1 + rate);
+    let invested = amount * months;
+    let gain = fv - invested;
+
+    result.innerHTML =
+        `Future Value: ₹${fv.toFixed(0)}<br>
+         Invested: ₹${invested.toFixed(0)}<br>
+         Gain: ₹${gain.toFixed(0)}`;
+
+    if (sipChart) sipChart.destroy();
+
+    sipChart = new Chart(document.getElementById("sip_chart"), {
+        type:"pie",
+        data:{
+            labels:["Invested","Gain"],
+            datasets:[{
+                data:[invested, gain],
+                backgroundColor:["#1d4ed8","#16a34a"]
+            }]
+        }
+    });
+}
+
+calcSIP();
+</script>
+
+</body>
+</html>
