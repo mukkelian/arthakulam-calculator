@@ -25,7 +25,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 input[type=number] {
     -moz-appearance: textfield;
-    width: 50px;         /* YOUR REQUIRED SIZE */
+    width: 50px;
     padding: 6px;
     margin-left: 10px;
     border: 1px solid #c7d3ff;
@@ -44,6 +44,49 @@ input[type=number] {
 
 canvas { margin-top:20px; }
 .row { margin-bottom:20px; }
+
+/* ========= COLLAPSIBLE FORMULA SECTION ========= */
+.formula-header {
+    margin-top: 25px;
+    padding: 12px 15px;
+    background: #eef3ff;
+    border: 1px solid #c7d3ff;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #1d4ed8;
+    font-size: 16px;
+}
+
+.formula-header:hover {
+    background: #e2e8ff;
+}
+
+.formula-icon {
+    font-weight: bold;
+    font-size: 18px;
+    color: #1d4ed8;
+}
+
+.formula-content {
+    display: none;
+    padding: 15px;
+    border: 1px solid #c7d3ff;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #ffffff;
+}
+
+.formula-content pre {
+    background: #eef3ff;
+    padding: 10px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.4;
+}
 </style>
 </head>
 
@@ -120,19 +163,45 @@ canvas { margin-top:20px; }
 
     <div id="result"></div>
     <canvas id="sip_chart"></canvas>
+
+    <!-- ============ COLLAPSIBLE FORMULA SECTION ============ -->
+    <div class="formula-header" onclick="toggleFormulaSIP()">
+        <span>How SIP Values Are Calculated?</span>
+        <span id="formula_arrow_sip" class="formula-icon">▼</span>
+    </div>
+
+    <div id="formula_section_sip" class="formula-content">
+
+        <h3>SIP Future Value Formula</h3>
+        <p>SIP uses monthly compounding. Each installment grows until maturity.</p>
+
+<pre>
+FV = P × ((1 + r)ⁿ − 1) / r × (1 + r)
+
+Where:
+ P = Monthly SIP Amount
+ r = Monthly Return Rate (Annual % ÷ 12 ÷ 100)
+ n = Total Months (Years × 12)
+
+Invested Amount = P × n
+Gain = FV − Invested Amount
+</pre>
+
+    </div>
+
 </div>
 
 <script>
 let sipChart;
 
-/* ---------------- DIGIT LIMIT ---------------- */
+/* ----------- DIGIT LIMIT ----------- */
 function limitDigits(input, maxDigits) {
     if (input.value.length > maxDigits) {
         input.value = input.value.slice(0, maxDigits);
     }
 }
 
-/* ---------------- SYNC FUNCTIONS ---------------- */
+/* ----------- SYNC FUNCTIONS ----------- */
 function syncSIPAmountFromSlider() {
     sip_amt_input.value = sip_amt.value;
     calcSIP();
@@ -142,17 +211,14 @@ function syncSIPAmountFromInput() {
     calcSIP();
 }
 
-/* Return slider → input box (rounded), but input box → free entry */
 function syncReturnFromSlider() {
     sip_ret_input.value = Number(sip_ret.value).toFixed(1);
     calcSIP();
 }
 function syncReturnFromInput() {
-    // DO NOT update slider → allow ANY decimal input
     calcSIP();
 }
 
-/* Years sync */
 function syncYearsFromSlider() {
     sip_year_input.value = sip_year.value;
     calcSIP();
@@ -162,10 +228,10 @@ function syncYearsFromInput() {
     calcSIP();
 }
 
-/* ---------------- SIP CALCULATION ---------------- */
+/* ----------- CALCULATION ----------- */
 function calcSIP() {
     let amount = +sip_amt_input.value;
-    let rate = parseFloat(sip_ret_input.value) / 100 / 12;   // Use EXACT typed value
+    let rate = parseFloat(sip_ret_input.value) / 100 / 12;
     let years = +sip_year_input.value;
     let months = years * 12;
 
@@ -197,6 +263,20 @@ function calcSIP() {
 }
 
 calcSIP();
+
+/* ----------- COLLAPSIBLE FORMULA ----------- */
+function toggleFormulaSIP() {
+    const section = document.getElementById("formula_section_sip");
+    const arrow = document.getElementById("formula_arrow_sip");
+
+    if (section.style.display === "block") {
+        section.style.display = "none";
+        arrow.innerHTML = "▼";
+    } else {
+        section.style.display = "block";
+        arrow.innerHTML = "▲";
+    }
+}
 </script>
 
 </body>

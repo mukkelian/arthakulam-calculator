@@ -17,18 +17,17 @@ label { font-weight:bold; display:block; margin-bottom:5px; }
 
 input[type=range] { width:100%; }
 
+/* REMOVE ARROWS */
 input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-}
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 input[type=number]{
-    -moz-appearance: textfield;
-    width: 60px;
-    padding: 6px;
-    margin-left: 10px;
-    border: 1px solid #c7d3ff;
-    border-radius: 5px;
-    font-size: 14px;
+    -moz-appearance:textfield;
+    width:70px;
+    padding:6px;
+    margin-left:10px;
+    border:1px solid #c7d3ff;
+    border-radius:5px;
+    font-size:14px;
     text-align:right;
 }
 
@@ -39,9 +38,51 @@ input[type=number]{
     color:#1d4ed8;
     line-height:1.6;
 }
+canvas { margin-top:20px; }
+.row { margin-bottom:20px; }
 
-canvas{ margin-top:20px; }
-.row{ margin-bottom:20px; }
+/* ========= COLLAPSIBLE FORMULA SECTION ========= */
+.formula-header {
+    margin-top: 25px;
+    padding: 12px 15px;
+    background: #eef3ff;
+    border: 1px solid #c7d3ff;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #1d4ed8;
+    font-size: 16px;
+}
+
+.formula-header:hover {
+    background: #e2e8ff;
+}
+
+.formula-icon {
+    font-weight: bold;
+    font-size: 18px;
+    color: #1d4ed8;
+}
+
+.formula-content {
+    display: none;
+    padding: 15px;
+    border: 1px solid #c7d3ff;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #ffffff;
+}
+
+.formula-content pre {
+    background: #eef3ff;
+    padding: 10px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.4;
+}
 </style>
 </head>
 
@@ -50,44 +91,69 @@ canvas{ margin-top:20px; }
 <div class="container">
     <h2>Lumpsum Calculator</h2>
 
-    <!-- INVESTMENT -->
+    <!-- Investment Amount -->
     <div class="row">
         <label>Investment Amount (₹)</label>
-        <span id="inv_val" class="slider-value">200000</span>
+        <span id="ls_inv_val" class="slider-value">200000</span>
 
-        <input type="number" id="inv_input" min="5000" max="5000000" value="200000"
+        <input type="number" id="ls_inv_input" min="5000" max="5000000" value="200000"
             oninput="limitDigits(this,7); syncInvInput();">
 
-        <input type="range" id="inv" min="5000" max="5000000" step="10000" value="200000"
+        <input type="range" id="ls_inv" min="5000" max="5000000" step="10000" value="200000"
             oninput="syncInvSlider()">
     </div>
 
-    <!-- RETURN RATE -->
+    <!-- Expected Annual Return -->
     <div class="row">
         <label>Expected Annual Return (%)</label>
-        <span id="ret_val" class="slider-value">12.0%</span>
+        <span id="ls_ret_val" class="slider-value">12.0%</span>
 
-        <input type="number" id="ret_input" min="1" max="30" step="0.1" value="12.0"
+        <input type="number" id="ls_ret_input" min="1" max="30" step="0.1" value="12.0"
             oninput="limitDigits(this,4); syncRetInput();">
 
-        <input type="range" id="ret" min="1" max="30" step="0.5" value="12.0"
+        <input type="range" id="ls_ret" min="1" max="30" step="0.5" value="12.0"
             oninput="syncRetSlider()">
     </div>
 
-    <!-- YEARS -->
+    <!-- Duration (Years) -->
     <div class="row">
         <label>Duration (Years)</label>
-        <span id="year_val" class="slider-value">10</span>
+        <span id="ls_year_val" class="slider-value">10</span>
 
-        <input type="number" id="year_input" min="1" max="50" step="1" value="10"
+        <input type="number" id="ls_year_input" min="1" max="50" step="1" value="10"
             oninput="limitDigits(this,2); syncYearInput();">
 
-        <input type="range" id="year" min="1" max="50" step="1" value="10"
+        <input type="range" id="ls_year" min="1" max="50" step="1" value="10"
             oninput="syncYearSlider()">
     </div>
 
     <div id="result"></div>
     <canvas id="ls_chart"></canvas>
+
+    <!-- ============ COLLAPSIBLE FORMULA SECTION ============ -->
+    <div class="formula-header" onclick="toggleFormulaLS()">
+        <span>How Lumpsum Value Is Calculated?</span>
+        <span id="formula_arrow_ls" class="formula-icon">▼</span>
+    </div>
+
+    <div id="formula_section_ls" class="formula-content">
+
+        <h3>Lumpsum Future Value Formula</h3>
+        <p>Lumpsum invests the entire amount at once and compounds annually:</p>
+
+<pre>
+FV = P × (1 + r)ⁿ
+
+Where:
+ P = Initial Investment
+ r = Annual Return Rate (in decimal)
+ n = Number of Years
+
+Gain = FV − P
+</pre>
+
+    </div>
+
 </div>
 
 <script>
@@ -99,30 +165,30 @@ function limitDigits(input,max){
     }
 }
 
-/* Sync */
-function syncInvSlider(){ inv_input.value = inv.value; calcLS(); }
-function syncInvInput(){ inv.value = inv_input.value; calcLS(); }
+/* SYNC FUNCTIONS */
+function syncInvSlider(){ ls_inv_input.value = ls_inv.value; calcLS(); }
+function syncInvInput(){ ls_inv.value = ls_inv_input.value; calcLS(); }
 
 function syncRetSlider(){
-    ret_input.value = Number(ret.value).toFixed(1);
+    ls_ret_input.value = Number(ls_ret.value).toFixed(1);
     calcLS();
 }
 function syncRetInput(){
     calcLS();
 }
 
-function syncYearSlider(){ year_input.value = year.value; calcLS(); }
-function syncYearInput(){ year.value = year_input.value; calcLS(); }
+function syncYearSlider(){ ls_year_input.value = ls_year.value; calcLS(); }
+function syncYearInput(){ ls_year.value = ls_year_input.value; calcLS(); }
 
-/* Calc */
+/* MAIN LUMPSUM CALCULATION */
 function calcLS(){
-    let amount = +inv_input.value;
-    let rate = parseFloat(ret_input.value)/100;
-    let years = +year_input.value;
+    let amount = +ls_inv_input.value;
+    let rate = parseFloat(ls_ret_input.value)/100;
+    let years = +ls_year_input.value;
 
-    inv_val.innerText = amount;
-    ret_val.innerText = parseFloat(ret_input.value).toFixed(1)+"%";
-    year_val.innerText = years;
+    ls_inv_val.innerText = amount;
+    ls_ret_val.innerText = parseFloat(ls_ret_input.value).toFixed(1)+"%";
+    ls_year_val.innerText = years;
 
     let fv = amount * Math.pow(1+rate, years);
     let gain = fv - amount;
@@ -146,8 +212,21 @@ function calcLS(){
 }
 
 calcLS();
+
+/* COLLAPSIBLE FORMULA */
+function toggleFormulaLS() {
+    const section = document.getElementById("formula_section_ls");
+    const arrow = document.getElementById("formula_arrow_ls");
+
+    if (section.style.display === "block") {
+        section.style.display = "none";
+        arrow.innerHTML = "▼";
+    } else {
+        section.style.display = "block";
+        arrow.innerHTML = "▲";
+    }
+}
 </script>
 
 </body>
 </html>
-

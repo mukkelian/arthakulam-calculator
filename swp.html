@@ -40,6 +40,49 @@ input[type=number]{
 }
 canvas { margin-top:20px; }
 .row { margin-bottom:20px; }
+
+/* ========= COLLAPSIBLE FORMULA SECTION ========= */
+.formula-header {
+    margin-top: 25px;
+    padding: 12px 15px;
+    background: #eef3ff;
+    border: 1px solid #c7d3ff;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #1d4ed8;
+    font-size: 16px;
+}
+
+.formula-header:hover {
+    background: #e2e8ff;
+}
+
+.formula-icon {
+    font-weight: bold;
+    font-size: 18px;
+    color: #1d4ed8;
+}
+
+.formula-content {
+    display: none;
+    padding: 15px;
+    border: 1px solid #c7d3ff;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #ffffff;
+}
+
+.formula-content pre {
+    background: #eef3ff;
+    padding: 10px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    line-height: 1.4;
+}
 </style>
 </head>
 
@@ -75,17 +118,54 @@ canvas { margin-top:20px; }
     <!-- Expected Return -->
     <div class="row">
         <label>Expected Annual Return (%)</label>
-        <span id="swp_ret_val" class="slider-value">10.0%</span>
+        <span id="swp_ret_val" class="slider-value">12.0%</span>
 
-        <input type="number" id="swp_ret_input" min="1" max="30" step="0.1" value="10.0"
+        <input type="number" id="swp_ret_input" min="1" max="30" step="0.1" value="12.0"
             oninput="limitDigits(this,4); syncSWPRetInput();">
 
-        <input type="range" id="swp_ret" min="1" max="30" step="0.5" value="10.0"
+        <input type="range" id="swp_ret" min="1" max="30" step="0.5" value="12.0"
             oninput="syncSWPRetSlider()">
     </div>
 
     <div id="result"></div>
     <canvas id="swp_chart"></canvas>
+
+    <!-- ============ COLLAPSIBLE FORMULA SECTION ============ -->
+    <div class="formula-header" onclick="toggleFormulaSWP()">
+        <span>How SWP Values Are Calculated?</span>
+        <span id="formula_arrow_swp" class="formula-icon">▼</span>
+    </div>
+
+    <div id="formula_section_swp" class="formula-content">
+
+        <h3>Monthly SWP Calculation</h3>
+        <p>Every month the balance grows with returns and then withdrawal is deducted:</p>
+
+<pre>
+Balance_new = (Balance_old × (1 + r)) − W
+
+Where:
+ • r = Monthly return (Annual Return% ÷ 12 ÷ 100)
+ • W = Monthly Withdrawal
+</pre>
+
+        <h3>Simulation Loop</h3>
+<pre>
+Repeat monthly until:
+ • Balance becomes 0, OR
+ • 200 years (2400 months) completed
+</pre>
+
+        <h3>Corpus Lasts (Without SWP)</h3>
+        <p>This shows how long your corpus lasts WITHOUT any return:</p>
+
+<pre>
+Months_without_SWP = Corpus ÷ Withdrawal
+Years_without_SWP  = Months_without_SWP ÷ 12
+</pre>
+
+    </div>
+
 </div>
 
 <script>
@@ -109,7 +189,7 @@ function syncSWPRetSlider(){
     calcSWP();
 }
 function syncSWPRetInput(){
-    calcSWP();    /* allow free decimal entry */
+    calcSWP();
 }
 
 /* MAIN SWP CALCULATION */
@@ -163,6 +243,20 @@ function calcSWP(){
 }
 
 calcSWP();
+
+/* COLLAPSIBLE FORMULA */
+function toggleFormulaSWP() {
+    const section = document.getElementById("formula_section_swp");
+    const arrow = document.getElementById("formula_arrow_swp");
+
+    if (section.style.display === "block") {
+        section.style.display = "none";
+        arrow.innerHTML = "▼";
+    } else {
+        section.style.display = "block";
+        arrow.innerHTML = "▲";
+    }
+}
 </script>
 
 </body>
