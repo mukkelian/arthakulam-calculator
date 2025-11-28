@@ -17,7 +17,7 @@ label { font-weight:bold; display:block; margin-bottom:5px; }
 
 input[type=range] { width:100%; }
 
-/* REMOVE ARROWS */
+/* REMOVE NUMBER ARROWS */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
 input[type=number]{
@@ -27,62 +27,19 @@ input[type=number]{
     margin-left:10px;
     border:1px solid #c7d3ff;
     border-radius:5px;
-    font-size:14px;
+    font-size:16px;
     text-align:right;
 }
 
 #result{
     margin-top:15px;
-    font-size:18px;
+    font-size:16px;
     font-weight:bold;
     color:#1d4ed8;
     line-height:1.6;
 }
 canvas { margin-top:20px; }
 .row { margin-bottom:20px; }
-
-/* ========= COLLAPSIBLE FORMULA SECTION ========= */
-.formula-header {
-    margin-top: 25px;
-    padding: 12px 15px;
-    background: #eef3ff;
-    border: 1px solid #c7d3ff;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    color: #1d4ed8;
-    font-size: 16px;
-}
-
-.formula-header:hover {
-    background: #e2e8ff;
-}
-
-.formula-icon {
-    font-weight: bold;
-    font-size: 18px;
-    color: #1d4ed8;
-}
-
-.formula-content {
-    display: none;
-    padding: 15px;
-    border: 1px solid #c7d3ff;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    background: #ffffff;
-}
-
-.formula-content pre {
-    background: #eef3ff;
-    padding: 10px;
-    border-radius: 6px;
-    white-space: pre-wrap;
-    font-size: 14px;
-    line-height: 1.4;
-}
 </style>
 </head>
 
@@ -129,55 +86,19 @@ canvas { margin-top:20px; }
 
     <div id="result"></div>
     <canvas id="swp_chart"></canvas>
-
-    <!-- ============ COLLAPSIBLE FORMULA SECTION ============ -->
-    <div class="formula-header" onclick="toggleFormulaSWP()">
-        <span>How SWP Values Are Calculated?</span>
-        <span id="formula_arrow_swp" class="formula-icon">▼</span>
-    </div>
-
-    <div id="formula_section_swp" class="formula-content">
-
-        <h3>Monthly SWP Calculation</h3>
-        <p>Every month the balance grows with returns and then withdrawal is deducted:</p>
-
-<pre>
-Balance_new = (Balance_old × (1 + r)) − W
-
-Where:
- • r = Monthly return (Annual Return% ÷ 12 ÷ 100)
- • W = Monthly Withdrawal
-</pre>
-
-        <h3>Simulation Loop</h3>
-<pre>
-Repeat monthly until:
- • Balance becomes 0, OR
- • 200 years (2400 months) completed
-</pre>
-
-        <h3>Corpus Lasts (Without SWP)</h3>
-        <p>This shows how long your corpus lasts WITHOUT any return:</p>
-
-<pre>
-Months_without_SWP = Corpus ÷ Withdrawal
-Years_without_SWP  = Months_without_SWP ÷ 12
-</pre>
-
-    </div>
-
 </div>
 
 <script>
 let swpChart;
 
+/* DIGIT LIMITER */
 function limitDigits(input,max){
     if(input.value.length > max){
         input.value = input.value.slice(0,max);
     }
 }
 
-/* SYNC FUNCTIONS */
+/* SYNC SLIDERS + INPUTS */
 function syncSWPInvSlider(){ swp_inv_input.value = swp_inv.value; calcSWP(); }
 function syncSWPInvInput(){ swp_inv.value = swp_inv_input.value; calcSWP(); }
 
@@ -188,11 +109,9 @@ function syncSWPRetSlider(){
     swp_ret_input.value = Number(swp_ret.value).toFixed(1);
     calcSWP();
 }
-function syncSWPRetInput(){
-    calcSWP();
-}
+function syncSWPRetInput(){ calcSWP(); }
 
-/* MAIN SWP CALCULATION */
+/* SWP CALCULATION */
 function calcSWP(){
 
     let invest = +swp_inv_input.value;
@@ -206,7 +125,7 @@ function calcSWP(){
     let balance = invest;
     let months = 0;
 
-    /* SAFETY LIMIT = 200 years = 2400 months */
+    /* SAFETY LIMIT – 200 YEARS */
     while(balance > 0 && months < 2400){
         balance = balance * (1 + rate) - withdraw;
         months++;
@@ -216,18 +135,16 @@ function calcSWP(){
     let totalWithdrawn = withdraw * months;
     let finalBalance = Math.max(balance, 0);
 
-    /* WITHOUT SWP RETURN (no interest) */
+    /* NO RETURN (straight division) */
     let months_no_return = invest / withdraw;
     let years_no_return = (months_no_return / 12).toFixed(1);
 
-    /* DISPLAY RESULTS */
     result.innerHTML =
         `Corpus Lasts (With SWP): ${years_with_return} years<br>
          Corpus Lasts (Without SWP): ${years_no_return} years<br>
          Total Withdrawn: ₹${totalWithdrawn.toFixed(0)}<br>
          Final Balance: ₹${finalBalance.toFixed(0)}`;
 
-    /* PIE CHART */
     if(swpChart) swpChart.destroy();
 
     swpChart = new Chart(document.getElementById("swp_chart"), {
@@ -243,20 +160,6 @@ function calcSWP(){
 }
 
 calcSWP();
-
-/* COLLAPSIBLE FORMULA */
-function toggleFormulaSWP() {
-    const section = document.getElementById("formula_section_swp");
-    const arrow = document.getElementById("formula_arrow_swp");
-
-    if (section.style.display === "block") {
-        section.style.display = "none";
-        arrow.innerHTML = "▼";
-    } else {
-        section.style.display = "block";
-        arrow.innerHTML = "▲";
-    }
-}
 </script>
 
 </body>

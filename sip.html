@@ -17,26 +17,25 @@ label { font-weight:bold; display:block; margin-bottom:5px; }
 
 input[type=range] { width:100%; }
 
-/* REMOVE SPINNER ARROWS */
+/* REMOVE SPINNER */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
-    margin: 0;
 }
 input[type=number] {
     -moz-appearance: textfield;
-    width: 50px;
+    width: 60px;
     padding: 6px;
     margin-left: 10px;
     border: 1px solid #c7d3ff;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 16px;
     text-align: right;
 }
 
 #result {
     margin-top:15px; 
-    font-size:18px;
+    font-size:16px;
     font-weight:bold;
     color:#1d4ed8;
     line-height: 1.6;
@@ -44,49 +43,6 @@ input[type=number] {
 
 canvas { margin-top:20px; }
 .row { margin-bottom:20px; }
-
-/* ========= COLLAPSIBLE FORMULA SECTION ========= */
-.formula-header {
-    margin-top: 25px;
-    padding: 12px 15px;
-    background: #eef3ff;
-    border: 1px solid #c7d3ff;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    color: #1d4ed8;
-    font-size: 16px;
-}
-
-.formula-header:hover {
-    background: #e2e8ff;
-}
-
-.formula-icon {
-    font-weight: bold;
-    font-size: 18px;
-    color: #1d4ed8;
-}
-
-.formula-content {
-    display: none;
-    padding: 15px;
-    border: 1px solid #c7d3ff;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    background: #ffffff;
-}
-
-.formula-content pre {
-    background: #eef3ff;
-    padding: 10px;
-    border-radius: 6px;
-    white-space: pre-wrap;
-    font-size: 14px;
-    line-height: 1.4;
-}
 </style>
 </head>
 
@@ -95,113 +51,57 @@ canvas { margin-top:20px; }
 <div class="container">
     <h2>SIP Calculator</h2>
 
-    <!-- MONTHLY SIP AMOUNT -->
+    <!-- SIP AMOUNT -->
     <div class="row">
         <label>Monthly SIP Amount (₹)</label>
         <span id="sip_amt_val" class="slider-value">10000</span>
 
-        <input type="number"
-               id="sip_amt_input"
-               min="500"
-               max="100000"
-               step="100"
-               value="10000"
-               oninput="limitDigits(this,6); syncSIPAmountFromInput();">
+        <input type="number" id="sip_amt_input" min="500" max="100000" step="100"
+               value="10000" oninput="limitDigits(this,6); syncSIPAmountFromInput();">
 
-        <input type="range"
-               id="sip_amt"
-               min="500"
-               max="100000"
-               step="500"
-               value="10000"
-               oninput="syncSIPAmountFromSlider()">
+        <input type="range" id="sip_amt" min="500" max="100000" step="500"
+               value="10000" oninput="syncSIPAmountFromSlider()">
     </div>
 
-    <!-- EXPECTED RETURN -->
+    <!-- RETURN -->
     <div class="row">
         <label>Expected Annual Return (%)</label>
         <span id="sip_ret_val" class="slider-value">12.0%</span>
 
-        <input type="number"
-               id="sip_ret_input"
-               min="1"
-               max="30"
-               step="0.1"
-               value="12.0"
-               oninput="limitDigits(this,4); syncReturnFromInput();">
+        <input type="number" id="sip_ret_input" min="1" max="30" step="0.1"
+               value="12.0" oninput="limitDigits(this,4); syncReturnFromInput();">
 
-        <input type="range"
-               id="sip_ret"
-               min="1"
-               max="30"
-               step="0.5"
-               value="12.0"
-               oninput="syncReturnFromSlider()">
+        <input type="range" id="sip_ret" min="1" max="30" step="0.5"
+               value="12.0" oninput="syncReturnFromSlider()">
     </div>
 
-    <!-- DURATION YEARS -->
+    <!-- YEARS -->
     <div class="row">
         <label>Duration (Years)</label>
         <span id="sip_year_val" class="slider-value">10</span>
 
-        <input type="number"
-               id="sip_year_input"
-               min="1"
-               max="50"
-               step="1"
-               value="10"
-               oninput="limitDigits(this,2); syncYearsFromInput();">
+        <input type="number" id="sip_year_input" min="1" max="50" step="1"
+               value="10" oninput="limitDigits(this,2); syncYearsFromInput();">
 
-        <input type="range"
-               id="sip_year"
-               min="1"
-               max="50"
-               step="1"
-               value="10"
-               oninput="syncYearsFromSlider()">
+        <input type="range" id="sip_year" min="1" max="50" step="1"
+               value="10" oninput="syncYearsFromSlider()">
     </div>
 
     <div id="result"></div>
     <canvas id="sip_chart"></canvas>
-
-    <!-- ============ COLLAPSIBLE FORMULA SECTION ============ -->
-    <div class="formula-header" onclick="toggleFormulaSIP()">
-        <span>How SIP Values Are Calculated?</span>
-        <span id="formula_arrow_sip" class="formula-icon">▼</span>
-    </div>
-
-    <div id="formula_section_sip" class="formula-content">
-
-        <h3>SIP Future Value Formula</h3>
-        <p>SIP uses monthly compounding. Each installment grows until maturity.</p>
-
-<pre>
-FV = P × ((1 + r)ⁿ − 1) / r × (1 + r)
-
-Where:
- P = Monthly SIP Amount
- r = Monthly Return Rate (Annual % ÷ 12 ÷ 100)
- n = Total Months (Years × 12)
-
-Invested Amount = P × n
-Gain = FV − Invested Amount
-</pre>
-
-    </div>
-
 </div>
 
 <script>
 let sipChart;
 
-/* ----------- DIGIT LIMIT ----------- */
+/* DIGIT LIMIT */
 function limitDigits(input, maxDigits) {
     if (input.value.length > maxDigits) {
         input.value = input.value.slice(0, maxDigits);
     }
 }
 
-/* ----------- SYNC FUNCTIONS ----------- */
+/* SYNC FUNCTIONS */
 function syncSIPAmountFromSlider() {
     sip_amt_input.value = sip_amt.value;
     calcSIP();
@@ -215,9 +115,7 @@ function syncReturnFromSlider() {
     sip_ret_input.value = Number(sip_ret.value).toFixed(1);
     calcSIP();
 }
-function syncReturnFromInput() {
-    calcSIP();
-}
+function syncReturnFromInput() { calcSIP(); }
 
 function syncYearsFromSlider() {
     sip_year_input.value = sip_year.value;
@@ -228,7 +126,7 @@ function syncYearsFromInput() {
     calcSIP();
 }
 
-/* ----------- CALCULATION ----------- */
+/* SIP CALCULATION */
 function calcSIP() {
     let amount = +sip_amt_input.value;
     let rate = parseFloat(sip_ret_input.value) / 100 / 12;
@@ -263,20 +161,6 @@ function calcSIP() {
 }
 
 calcSIP();
-
-/* ----------- COLLAPSIBLE FORMULA ----------- */
-function toggleFormulaSIP() {
-    const section = document.getElementById("formula_section_sip");
-    const arrow = document.getElementById("formula_arrow_sip");
-
-    if (section.style.display === "block") {
-        section.style.display = "none";
-        arrow.innerHTML = "▼";
-    } else {
-        section.style.display = "block";
-        arrow.innerHTML = "▲";
-    }
-}
 </script>
 
 </body>
