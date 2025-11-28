@@ -142,9 +142,9 @@ function calcSIP() {
     let gain = fv - invested;
 
     result.innerHTML =
-        `Future Value: ₹${fv.toFixed(0)}<br>
-         Invested: ₹${invested.toFixed(0)}<br>
-         Gain: ₹${gain.toFixed(0)}`;
+        `<span style="color:black; font-weight:bold;">Future Value: </span> ₹${fv.toFixed(0)}<br>
+         <span style="color:black; font-weight:bold;">Invested: </span> ₹${invested.toFixed(0)}<br>
+         <span style="color:black; font-weight:bold;"> Gain: </span> ₹${gain.toFixed(0)}`;
 
     if (sipChart) sipChart.destroy();
 

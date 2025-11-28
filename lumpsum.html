@@ -124,9 +124,9 @@ function calcLS(){
     let gain = fv - amount;
 
     result.innerHTML =
-        `Future Value: ₹${fv.toFixed(0)}<br>
-         Invested: ₹${amount.toFixed(0)}<br>
-         Gain: ₹${gain.toFixed(0)}`;
+        `<span style="color:black; font-weight:bold;">Future Value: </span> ₹${fv.toFixed(0)}<br>
+         <span style="color:black; font-weight:bold;">Invested: </span> ₹${amount.toFixed(0)}<br>
+         <span style="color:black; font-weight:bold;"> Gain: </span> ₹${gain.toFixed(0)}`;
 
     if(lsChart) lsChart.destroy();
     lsChart = new Chart(document.getElementById("ls_chart"),{

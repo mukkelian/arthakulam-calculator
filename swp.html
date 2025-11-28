@@ -140,10 +140,10 @@ function calcSWP(){
     let years_no_return = (months_no_return / 12).toFixed(1);
 
     result.innerHTML =
-        `Corpus Lasts (With SWP): ${years_with_return} years<br>
-         Corpus Lasts (Without SWP): ${years_no_return} years<br>
-         Total Withdrawn: ₹${totalWithdrawn.toFixed(0)}<br>
-         Final Balance: ₹${finalBalance.toFixed(0)}`;
+        `<span style="color:black; font-weight:bold;">Corpus Lasts (With SWP) </span> <br>${years_with_return} years<br>
+         <span style="color:black; font-weight:bold;">Corpus Lasts (Without SWP) </span> <br> ${years_no_return} years<br>
+         <span style="color:black; font-weight:bold;">Total Withdrawn </span> <br> ₹${totalWithdrawn.toFixed(0)}<br>
+         <span style="color:black; font-weight:bold;">Final Balance </span> <br> ₹${finalBalance.toFixed(0)}`;
 
     if(swpChart) swpChart.destroy();
 
